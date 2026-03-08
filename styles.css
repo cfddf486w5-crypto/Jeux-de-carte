@@ -13,7 +13,27 @@ body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at top, #1a2551 0%, var(--bg) 55%);
+  background:
+    radial-gradient(circle at 15% 5%, rgba(148, 183, 255, 0.16), transparent 22%),
+    radial-gradient(circle at 88% 16%, rgba(100, 238, 214, 0.15), transparent 26%),
+    radial-gradient(circle at top, #1a2551 0%, var(--bg) 55%);
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 12% 20%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.8px 1.8px at 66% 40%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(2px 2px at 80% 68%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 26% 70%, rgba(255, 255, 255, 0.4), transparent);
+  animation: drift 24s linear infinite;
+  opacity: 0.55;
 }
 
 header {
@@ -33,6 +53,26 @@ section {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 0.9rem;
+  box-shadow: 0 16px 40px rgba(5, 10, 28, 0.45);
+}
+
+.immersion-panel {
+  background: linear-gradient(120deg, rgba(37, 56, 120, 0.85), rgba(15, 20, 45, 0.95));
+  border-color: #6d7ed4;
+}
+
+.chapter-line {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ambiance-row {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #dce6ff;
 }
 
 h2 { margin: 0 0 0.45rem; }
@@ -87,7 +127,7 @@ button {
 
 button:hover { filter: brightness(1.05); }
 
-.battle-result { margin-top: 0.7rem; font-weight: 700; }
+.battle-result { margin-top: 0.7rem; font-weight: 700; color: #91ffd7; }
 
 .battle-log {
   margin-top: 0.65rem;
@@ -130,7 +170,10 @@ button:hover { filter: brightness(1.05); }
   outline: none;
 }
 
-.card-3d.is-selected { filter: drop-shadow(0 0 10px #7cfde6); transform: rotateZ(var(--rotate)) translateY(-20px) scale(1.04); }
+.card-3d.is-selected {
+  filter: drop-shadow(0 0 10px #7cfde6);
+  transform: rotateZ(var(--rotate)) translateY(-20px) scale(1.04);
+}
 
 .card-face {
   height: 100%;
@@ -160,4 +203,9 @@ button:hover { filter: brightness(1.05); }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.28rem;
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-40px); }
 }

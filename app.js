@@ -13,6 +13,13 @@ const abilities = [
   { name: "Ombre Vive", text: "Esquive 20% des coups.", evadeChance: 0.2 }
 ];
 
+const atmospheres = [
+  "Nébuleuse carmin — des braises astrales dansent à l'horizon.",
+  "Tempête d'éclats — le champ de bataille vibre sous les comètes.",
+  "Silence du vide — chaque décision résonne comme un destin.",
+  "Aube cosmique — une lueur dorée galvanise vos troupes."
+];
+
 function createDeck(prefix, themes, offset) {
   return Array.from({ length: 60 }, (_, i) => {
     const className = classes[i % classes.length];
@@ -50,7 +57,8 @@ const state = {
   playerSlot: null,
   opponentSlot: null,
   selectedCardId: null,
-  logs: []
+  logs: [],
+  phase: "Préparation"
 };
 
 function shuffle(deck) {
@@ -146,6 +154,16 @@ function renderOpponentHand() {
   });
 }
 
+function renderImmersion() {
+  const chapterLine = document.getElementById("chapterLine");
+  const ambianceText = document.getElementById("ambianceText");
+  const phaseText = document.getElementById("phaseText");
+
+  chapterLine.textContent = `Chronique ${state.turn}: ${state.playerHp > state.opponentHp ? "vous prenez l'avantage" : "la bataille reste incertaine"}.`;
+  ambianceText.textContent = atmospheres[state.turn % atmospheres.length];
+  phaseText.textContent = state.phase;
+}
+
 function render() {
   document.getElementById("playerHp").textContent = state.playerHp;
   document.getElementById("opponentHp").textContent = state.opponentHp;
@@ -156,6 +174,7 @@ function render() {
   document.getElementById("playerSlot").innerHTML = state.playerSlot ? cardSummary(state.playerSlot) : "Aucune créature alliée";
   document.getElementById("opponentSlot").innerHTML = state.opponentSlot ? cardSummary(state.opponentSlot) : "Aucune créature adverse";
 
+  renderImmersion();
   renderHand();
   renderOpponentHand();
   document.getElementById("battleLog").textContent = state.logs.slice(-12).join("\n");
@@ -175,7 +194,8 @@ function startGame() {
     playerSlot: null,
     opponentSlot: null,
     selectedCardId: null,
-    logs: ["Nouvelle partie lancée. Votre objectif : réduire les PV adverses à 0."]
+    phase: "Déploiement",
+    logs: ["Nouvelle partie lancée. Le voile astral se déchire au-dessus de l'arène."]
   });
 
   draw(state.playerHand, state.playerDeck, 5);
@@ -193,7 +213,8 @@ function playSelectedCard() {
   state.playerSlot = card;
   state.playerHand = state.playerHand.filter((c) => c.id !== card.id);
   state.selectedCardId = null;
-  state.logs.push(`Vous invoquez ${card.name}.`);
+  state.phase = "Offensive";
+  state.logs.push(`Vous invoquez ${card.name}. Sa présence déforme le champ de bataille.`);
   render();
 }
 
@@ -209,7 +230,7 @@ function opponentPlay() {
   state.opponentMana -= card.cost;
   state.opponentSlot = card;
   state.opponentHand = state.opponentHand.filter((c) => c.id !== card.id);
-  state.logs.push(`L'adversaire invoque ${card.name}.`);
+  state.logs.push(`L'adversaire invoque ${card.name}. Les ombres se densifient.`);
 }
 
 function resolveCombat() {
@@ -233,6 +254,7 @@ function resolveCombat() {
 function endTurn() {
   if (state.playerHp <= 0 || state.opponentHp <= 0) return;
 
+  state.phase = "Résolution";
   opponentPlay();
   resolveCombat();
 
@@ -244,12 +266,13 @@ function endTurn() {
   }
 
   state.turn += 1;
+  state.phase = "Préparation";
   state.playerMana = Math.min(10, state.turn);
   state.opponentMana = Math.min(10, state.turn);
   draw(state.playerHand, state.playerDeck, 1);
   draw(state.opponentHand, state.opponentDeck, 1);
   document.getElementById("battleResult").textContent = `Tour ${state.turn} — préparez votre prochaine action.`;
-  state.logs.push(`--- Tour ${state.turn} ---`);
+  state.logs.push(`--- Tour ${state.turn}: une nouvelle onde stellaire traverse l'arène. ---`);
   render();
 }
 
