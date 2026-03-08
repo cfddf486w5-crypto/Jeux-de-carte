@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="space-warp" aria-hidden="true"></div>
   <header>
     <h1>Chroniques Astrales</h1>
     <p>Prototype original d'interface de jeu de cartes stratégique (inspiré du genre TCG).</p>
   </header>
 
-  <main class="board">
+  <main class="board split-layout">
     <section class="immersion-panel" aria-live="polite">
       <p id="chapterLine" class="chapter-line"></p>
       <div class="ambiance-row">
@@ -21,24 +22,25 @@
       </div>
     </section>
 
-    <section class="hero hero-opponent">
-      <h2>Adversaire</h2>
-      <p>PV <strong id="opponentHp">30</strong> · Mana <strong id="opponentMana">1</strong></p>
+    <section class="hero hero-opponent play-zone">
+      <div class="hero-row">
+        <div>
+          <h2>Adversaire</h2>
+          <p>PV <strong id="opponentHp">30</strong> · Mana <strong id="opponentMana">1</strong></p>
+        </div>
+        <div class="deck-pile" id="opponentDeckPile" aria-label="Paquet adversaire">
+          <span>PAQUET</span>
+        </div>
+      </div>
       <div id="opponentHand" class="opponent-hand"></div>
+      <div class="lane-card versus-card">
+        <h3>Table adverse (max 5)</h3>
+        <div class="board-row" id="opponentBoard"></div>
+      </div>
     </section>
 
     <section class="battlefield">
-      <h2>Champ de bataille</h2>
-      <div class="lane-grid">
-        <article class="lane-card">
-          <h3>Table adverse (max 5)</h3>
-          <div class="board-row" id="opponentBoard"></div>
-        </article>
-        <article class="lane-card">
-          <h3>Votre table (max 5)</h3>
-          <div class="board-row" id="playerBoard"></div>
-        </article>
-      </div>
+      <h2>Zone de combat</h2>
       <div class="action-row">
         <button id="dealBtn">Nouvelle partie</button>
         <button id="playBtn">Jouer la carte sélectionnée</button>
@@ -48,13 +50,26 @@
       <pre id="battleLog" class="battle-log"></pre>
     </section>
 
-    <section class="hero hero-player">
-      <h2>Vous</h2>
-      <p>PV <strong id="playerHp">30</strong> · Mana <strong id="playerMana">1</strong> · Tour <strong id="turnCounter">1</strong></p>
+    <section class="hero hero-player play-zone">
+      <div class="hero-row">
+        <div>
+          <h2>Vous</h2>
+          <p>PV <strong id="playerHp">30</strong> · Mana <strong id="playerMana">1</strong> · Tour <strong id="turnCounter">1</strong></p>
+        </div>
+        <div class="deck-pile" id="playerDeckPile" aria-label="Votre paquet">
+          <span>PIOCHE</span>
+        </div>
+      </div>
       <p class="hint">Sélectionnez une carte puis cliquez sur « Jouer la carte sélectionnée ».</p>
+      <div class="lane-card versus-card">
+        <h3>Votre table (max 5)</h3>
+        <div class="board-row" id="playerBoard"></div>
+      </div>
       <div id="deckA" class="hand-3d"></div>
     </section>
   </main>
+
+  <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
 
   <template id="cardTemplate">
     <article class="card-3d" tabindex="0" role="button" aria-label="Sélectionner la carte">
