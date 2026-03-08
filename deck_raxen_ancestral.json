@@ -16,7 +16,9 @@
       "defense": 12,
       "speed": 3,
       "effect": "Aura: les unités Raxen gagnent +2 ATQ. À chaque monde conquis, soigne 4 PV.",
-      "story": "Dernier stratège de la guerre originelle raxenne, il guide l'Arche vers des mondes à réduire en cendres."
+      "story": "Dernier stratège de la guerre originelle raxenne, il guide l'Arche vers des mondes à réduire en cendres.",
+      "image": "assets/raxen_ancestral_images/RH-001_XalTor,_Patriarche_de_lArche_Brisée.svg",
+      "race": "Raxen"
     },
     {
       "id": "RU-001",
@@ -28,7 +30,9 @@
       "defense": 5,
       "speed": 4,
       "effect": "À l'attaque d'un héros, inflige +3 dégâts directs.",
-      "story": "Fantassin lourd spécialisé dans la destruction des cœurs planétaires."
+      "story": "Fantassin lourd spécialisé dans la destruction des cœurs planétaires.",
+      "image": "assets/raxen_ancestral_images/RU-001_Briseur_de_Noyau.svg",
+      "race": "Raxen"
     },
     {
       "id": "RU-002",
@@ -40,7 +44,9 @@
       "defense": 8,
       "speed": 2,
       "effect": "À l'invocation: pioche 1 carte Raxen.",
-      "story": "Conserve la mémoire des milliards de mondes détruits."
+      "story": "Conserve la mémoire des milliards de mondes détruits.",
+      "image": "assets/raxen_ancestral_images/RU-002_Archiviste_des_Cendres.svg",
+      "race": "Raxen"
     },
     {
       "id": "RU-003",
@@ -52,7 +58,9 @@
       "defense": 4,
       "speed": 7,
       "effect": "Esquive 20%. Si survit, donne +1 vitesse à un allié.",
-      "story": "Premier à entrer en orbite pour marquer les cités à annihiler."
+      "story": "Premier à entrer en orbite pour marquer les cités à annihiler.",
+      "image": "assets/raxen_ancestral_images/RU-003_Éclaireur_du_Vide_Profond.svg",
+      "race": "Raxen"
     },
     {
       "id": "RU-004",
@@ -64,7 +72,9 @@
       "defense": 10,
       "speed": 2,
       "effect": "À la fin du tour: soigne 2 PV à une unité alliée.",
-      "story": "Ingénieur de chair et de métal, il recoud les soldats sur le champ de ruine."
+      "story": "Ingénieur de chair et de métal, il recoud les soldats sur le champ de ruine.",
+      "image": "assets/raxen_ancestral_images/RU-004_Régent_Biomécanique.svg",
+      "race": "Raxen"
     },
     {
       "id": "RU-005",
@@ -76,7 +86,9 @@
       "defense": 6,
       "speed": 5,
       "effect": "Critique 25%. Si elle détruit une unité, peut réattaquer.",
-      "story": "Créature de guerre élevée dans les soutes noires de l'Arche."
+      "story": "Créature de guerre élevée dans les soutes noires de l'Arche.",
+      "image": "assets/raxen_ancestral_images/RU-005_Prédatrice_dÉtoiles.svg",
+      "race": "Raxen"
     },
     {
       "id": "RS-001",
@@ -84,7 +96,9 @@
       "name": "Décret d'Extinction",
       "mana": 6,
       "effect": "Inflige 7 dégâts à toutes les unités ennemies.",
-      "story": "Sentence impériale utilisée avant la vitrification d'une planète."
+      "story": "Sentence impériale utilisée avant la vitrification d'une planète.",
+      "image": "assets/raxen_ancestral_images/RS-001_Décret_dExtinction.svg",
+      "race": "Raxen"
     },
     {
       "id": "RS-002",
@@ -92,7 +106,9 @@
       "name": "Forge d'Antimatière",
       "mana": 4,
       "effect": "Donne +3 ATQ et +3 DEF à une unité alliée.",
-      "story": "Rituel industriel où le métal vivant boit la lumière des soleils morts."
+      "story": "Rituel industriel où le métal vivant boit la lumière des soleils morts.",
+      "image": "assets/raxen_ancestral_images/RS-002_Forge_dAntimatière.svg",
+      "race": "Raxen"
     },
     {
       "id": "RS-003",
@@ -100,7 +116,9 @@
       "name": "Serment des Survivants",
       "mana": 3,
       "effect": "Soigne le héros de 6 PV et une unité de 4 PV.",
-      "story": "Promesse gravée après la destruction de leur monde natal."
+      "story": "Promesse gravée après la destruction de leur monde natal.",
+      "image": "assets/raxen_ancestral_images/RS-003_Serment_des_Survivants.svg",
+      "race": "Raxen"
     },
     {
       "id": "RA-001",
@@ -109,7 +127,9 @@
       "mana": 8,
       "pv": 18,
       "effect": "Une fois par tour: invoque un Drone Raxen 3/3.",
-      "story": "Vaisseau ancestral des survivants, cathédrale mobile de destruction."
+      "story": "Vaisseau ancestral des survivants, cathédrale mobile de destruction.",
+      "image": "assets/raxen_ancestral_images/RA-001_Arche_de_la_Guerre_Sans_Fin.svg",
+      "race": "Raxen"
     }
   ]
 }
