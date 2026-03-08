@@ -30,13 +30,19 @@
     <section class="battlefield">
       <h2>Champ de bataille</h2>
       <div class="lane-grid">
-        <article class="lane-card" id="opponentSlot">Aucune créature adverse</article>
-        <article class="lane-card" id="playerSlot">Aucune créature alliée</article>
+        <article class="lane-card">
+          <h3>Table adverse (max 5)</h3>
+          <div class="board-row" id="opponentBoard"></div>
+        </article>
+        <article class="lane-card">
+          <h3>Votre table (max 5)</h3>
+          <div class="board-row" id="playerBoard"></div>
+        </article>
       </div>
       <div class="action-row">
         <button id="dealBtn">Nouvelle partie</button>
         <button id="playBtn">Jouer la carte sélectionnée</button>
-        <button id="fightBtn">Terminer le tour</button>
+        <button id="fightBtn">Passer à la phase suivante</button>
       </div>
       <div id="battleResult" class="battle-result"></div>
       <pre id="battleLog" class="battle-log"></pre>
