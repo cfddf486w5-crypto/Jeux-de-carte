@@ -28,13 +28,15 @@ const phases = [
   "5. Sorts de soin / soutien"
 ];
 
+const MAX_BOARD = 5;
+const ACTION_DELAY = 370;
+
 function createDeck(prefix, themes, offset) {
   return Array.from({ length: 60 }, (_, i) => {
     const className = classes[i % classes.length];
     const ability = abilities[(i + offset) % abilities.length];
     const theme = themes[i % themes.length];
     const rank = Math.floor(i / themes.length) + 1;
-
     return {
       id: `${prefix}-${i + 1}`,
       name: `${theme} ${rank}`,
@@ -52,8 +54,6 @@ function createDeck(prefix, themes, offset) {
 const baseDeckA = createDeck("SOL", ["Aurogard", "Lumina", "Helion", "Solaria", "Astreon", "Pyrelis", "Orionel", "Clareon", "Valkor", "Zenith", "Dawnis", "Rubion"], 1);
 const baseDeckB = createDeck("OMB", ["Nocthar", "Umbrys", "Néantor", "Morbane", "Velkar", "Shadriel", "Sépulor", "Duskhan", "Obscuron", "Vesper", "Nyxor", "Drakmor"], 5);
 
-const MAX_BOARD = 5;
-
 const state = {
   turn: 1,
   playerHp: 30,
@@ -69,8 +69,11 @@ const state = {
   selectedCardId: null,
   logs: [],
   phase: phases[0],
-  phaseIndex: 0
+  phaseIndex: 0,
+  actionQueue: Promise.resolve()
 };
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function shuffle(deck) {
   const copy = [...deck];
@@ -82,9 +85,15 @@ function shuffle(deck) {
 }
 
 function draw(hand, deck, amount = 1) {
+  const drawn = [];
   for (let i = 0; i < amount; i++) {
-    if (deck.length) hand.push(deck.shift());
+    if (deck.length) {
+      const card = deck.shift();
+      hand.push(card);
+      drawn.push(card);
+    }
   }
+  return drawn;
 }
 
 function toState(card) {
@@ -125,6 +134,47 @@ function duel(cardA, cardB) {
   return { aHp: a.hp, bHp: b.hp };
 }
 
+function enqueue(action) {
+  state.actionQueue = state.actionQueue.then(action).catch(() => {});
+  return state.actionQueue;
+}
+
+function getRectCenter(el) {
+  if (!el) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+async function animateTravel(fromEl, toEl, className = "fx-card") {
+  const fxLayer = document.getElementById("fxLayer");
+  const fx = document.createElement("div");
+  fx.className = className;
+  fxLayer.appendChild(fx);
+
+  const from = getRectCenter(fromEl);
+  const to = getRectCenter(toEl);
+
+  fx.style.left = `${from.x - 30}px`;
+  fx.style.top = `${from.y - 42}px`;
+  fx.style.opacity = "1";
+
+  await sleep(16);
+  fx.style.transition = "transform 360ms cubic-bezier(.22,.88,.35,1), opacity 360ms ease";
+  fx.style.transform = `translate(${to.x - from.x}px, ${to.y - from.y}px) scale(0.92)`;
+  fx.style.opacity = "0.2";
+
+  await sleep(ACTION_DELAY);
+  fx.remove();
+}
+
+function pulseSlot(slot, className) {
+  if (!slot) return;
+  slot.classList.remove(className);
+  void slot.offsetWidth;
+  slot.classList.add(className);
+  setTimeout(() => slot.classList.remove(className), 540);
+}
+
 function cardSummary(card) {
   const hp = card.currentHp ?? card.hp;
   return `<strong>${card.name}</strong><br>Coût ${card.cost} · ${card.attack}/${card.defense} · PV ${Math.max(0, hp)}<br><small>${card.ability.name}</small>`;
@@ -138,6 +188,7 @@ function renderHand() {
   state.playerHand.forEach((card, index) => {
     const fragment = tpl.content.cloneNode(true);
     const node = fragment.querySelector(".card-3d");
+    node.dataset.cardId = card.id;
     node.style.setProperty("--rotate", `${(index - Math.floor(state.playerHand.length / 2)) * 4}deg`);
 
     fragment.querySelector(".card-name").textContent = card.name;
@@ -172,6 +223,7 @@ function renderBoard(containerId, board, emptyText) {
   for (let i = 0; i < MAX_BOARD; i++) {
     const slot = document.createElement("div");
     slot.className = "mini-slot";
+    slot.dataset.lane = String(i);
     const card = board[i];
     slot.innerHTML = card ? cardSummary(card) : `<em>${emptyText}</em>`;
     container.appendChild(slot);
@@ -189,13 +241,9 @@ function renderOpponentHand() {
 }
 
 function renderImmersion() {
-  const chapterLine = document.getElementById("chapterLine");
-  const ambianceText = document.getElementById("ambianceText");
-  const phaseText = document.getElementById("phaseText");
-
-  chapterLine.textContent = `Chronique ${state.turn}: ${state.playerHp > state.opponentHp ? "vous prenez l'avantage" : "la bataille reste incertaine"}.`;
-  ambianceText.textContent = atmospheres[state.turn % atmospheres.length];
-  phaseText.textContent = state.phase;
+  document.getElementById("chapterLine").textContent = `Chronique ${state.turn}: ${state.playerHp > state.opponentHp ? "vous prenez l'avantage" : "la bataille reste incertaine"}.`;
+  document.getElementById("ambianceText").textContent = atmospheres[state.turn % atmospheres.length];
+  document.getElementById("phaseText").textContent = state.phase;
 }
 
 function render() {
@@ -207,11 +255,20 @@ function render() {
 
   renderBoard("playerBoard", state.playerBoard, "Emplacement vide");
   renderBoard("opponentBoard", state.opponentBoard, "Emplacement vide");
-
   renderImmersion();
   renderHand();
   renderOpponentHand();
   document.getElementById("battleLog").textContent = state.logs.slice(-14).join("\n");
+}
+
+function queueDrawFx(count, sourceId, targetId) {
+  for (let i = 0; i < count; i++) {
+    enqueue(async () => {
+      const source = document.getElementById(sourceId);
+      const target = document.getElementById(targetId);
+      await animateTravel(source, target);
+    });
+  }
 }
 
 function startGame() {
@@ -232,14 +289,16 @@ function startGame() {
     phaseIndex: 0,
     logs: [
       "Nouvelle partie lancée.",
-      "Règle active: chaque joueur possède sa table de créatures (5 combattants max).",
+      "Règle active: plateau split-screen (haut: adversaire, bas: joueur).",
       `Phase actuelle: ${phases[0]}`
     ]
   });
 
-  draw(state.playerHand, state.playerDeck, 5);
-  draw(state.opponentHand, state.opponentDeck, 5);
+  const p = draw(state.playerHand, state.playerDeck, 5).length;
+  const o = draw(state.opponentHand, state.opponentDeck, 5).length;
   render();
+  queueDrawFx(p, "playerDeckPile", "deckA");
+  queueDrawFx(o, "opponentDeckPile", "opponentHand");
 }
 
 function playSelectedCard() {
@@ -250,12 +309,21 @@ function playSelectedCard() {
   if (!card) return state.logs.push("Sélectionnez d'abord une carte.") || render();
   if (card.cost > state.playerMana) return state.logs.push(`Mana insuffisant (${card.cost} requis).`) || render();
 
+  const handCardEl = document.querySelector(`.card-3d[data-card-id="${card.id}"]`);
+  handCardEl?.classList.add("is-committing");
+
   state.playerMana -= card.cost;
   state.playerBoard.push({ ...card, currentHp: card.hp });
   state.playerHand = state.playerHand.filter((c) => c.id !== card.id);
   state.selectedCardId = null;
   state.logs.push(`Vous placez ${card.name} sur votre table.`);
   render();
+
+  enqueue(async () => {
+    const targetSlot = document.querySelector(`#playerBoard .mini-slot[data-lane="${state.playerBoard.length - 1}"]`);
+    await animateTravel(document.getElementById("deckA"), targetSlot);
+    pulseSlot(targetSlot, "is-boosted");
+  });
 }
 
 function opponentPlay() {
@@ -271,29 +339,57 @@ function opponentPlay() {
   state.opponentBoard.push({ ...card, currentHp: card.hp });
   state.opponentHand = state.opponentHand.filter((c) => c.id !== card.id);
   state.logs.push(`L'adversaire place ${card.name} sur sa table.`);
+
+  enqueue(async () => {
+    render();
+    const lane = state.opponentBoard.length - 1;
+    const targetSlot = document.querySelector(`#opponentBoard .mini-slot[data-lane="${lane}"]`);
+    await animateTravel(document.getElementById("opponentHand"), targetSlot);
+    pulseSlot(targetSlot, "is-boosted");
+  });
 }
 
-function resolveCombat() {
+async function triggerBoostAnimations() {
+  const playerTargets = [...document.querySelectorAll("#playerBoard .mini-slot")].slice(0, state.playerBoard.length);
+  const opponentTargets = [...document.querySelectorAll("#opponentBoard .mini-slot")].slice(0, state.opponentBoard.length);
+  [...playerTargets, ...opponentTargets].forEach((slot) => pulseSlot(slot, "is-boosted"));
+  state.logs.push("Phase 3: les auras de boost s'activent sur toutes les créatures en jeu.");
+  await sleep(430);
+}
+
+async function resolveCombat() {
   const lanes = Math.max(state.playerBoard.length, state.opponentBoard.length);
 
   for (let i = 0; i < lanes; i++) {
     const ally = state.playerBoard[i];
     const enemy = state.opponentBoard[i];
+    const allySlot = document.querySelector(`#playerBoard .mini-slot[data-lane="${i}"]`);
+    const enemySlot = document.querySelector(`#opponentBoard .mini-slot[data-lane="${i}"]`);
 
     if (ally && enemy) {
+      pulseSlot(allySlot, "is-attacking");
+      await animateTravel(allySlot, enemySlot, "fx-burst");
+      pulseSlot(enemySlot, "is-damaged");
+
       const result = duel(ally, enemy);
       ally.currentHp = result.aHp;
       enemy.currentHp = result.bHp;
       state.logs.push(`Ligne ${i + 1}: ${ally.name} (${Math.max(0, result.aHp)} PV) vs ${enemy.name} (${Math.max(0, result.bHp)} PV).`);
+      await sleep(160);
     } else if (ally && !enemy) {
+      pulseSlot(allySlot, "is-attacking");
+      await animateTravel(allySlot, document.getElementById("opponentHp"), "fx-burst");
       const dmg = Math.max(1, Math.floor(ally.attack / 2));
       state.opponentHp -= dmg;
       state.logs.push(`Ligne ${i + 1}: ${ally.name} attaque le héros adverse (${dmg} dégâts).`);
     } else if (!ally && enemy) {
+      pulseSlot(enemySlot, "is-attacking");
+      await animateTravel(enemySlot, document.getElementById("playerHp"), "fx-burst");
       const dmg = Math.max(1, Math.floor(enemy.attack / 2));
       state.playerHp -= dmg;
       state.logs.push(`Ligne ${i + 1}: ${enemy.name} attaque votre héros (${dmg} dégâts).`);
     }
+    render();
   }
 
   state.playerBoard = state.playerBoard.filter((c) => (c.currentHp ?? c.hp) > 0);
@@ -304,13 +400,17 @@ function beginNewTurn() {
   state.turn += 1;
   state.playerMana = Math.min(10, state.turn);
   state.opponentMana = Math.min(10, state.turn);
-  draw(state.playerHand, state.playerDeck, 1);
-  draw(state.opponentHand, state.opponentDeck, 1);
+  const p = draw(state.playerHand, state.playerDeck, 1).length;
+  const o = draw(state.opponentHand, state.opponentDeck, 1).length;
+
   state.phaseIndex = 0;
   state.phase = phases[state.phaseIndex];
   state.logs.push(`--- Tour ${state.turn}: changement de joueur, reprise des 5 phases. ---`);
   state.logs.push("Phase 1: début du tour, pioche d'une carte.");
   document.getElementById("battleResult").textContent = `Tour ${state.turn} — ${state.phase}`;
+  render();
+  queueDrawFx(p, "playerDeckPile", "deckA");
+  queueDrawFx(o, "opponentDeckPile", "opponentHand");
 }
 
 function checkGameOver() {
@@ -324,26 +424,23 @@ function checkGameOver() {
   return false;
 }
 
-function nextPhase() {
+async function nextPhase() {
   if (checkGameOver()) return;
 
-  if (state.phaseIndex === 1) {
-    opponentPlay();
-  }
-
-  if (state.phaseIndex === 2) {
-    state.logs.push("Phase 3: boosts/dégâts/sorts offensifs (prototype narratif). ");
-  }
+  if (state.phaseIndex === 1) opponentPlay();
+  if (state.phaseIndex === 2) await triggerBoostAnimations();
 
   if (state.phaseIndex === 3) {
-    resolveCombat();
+    await resolveCombat();
     if (checkGameOver()) return;
   }
 
   if (state.phaseIndex === 4) {
-    state.logs.push("Phase 5: fenêtre de soins et sorts alliés (prototype narratif).");
+    state.logs.push("Phase 5: fenêtre de soins et sorts alliés (effet de soutien visuel). ");
+    const first = document.querySelector("#playerBoard .mini-slot[data-lane='0']");
+    pulseSlot(first, "is-boosted");
+    await sleep(220);
     beginNewTurn();
-    render();
     return;
   }
 
@@ -356,6 +453,6 @@ function nextPhase() {
 
 document.getElementById("dealBtn").addEventListener("click", startGame);
 document.getElementById("playBtn").addEventListener("click", playSelectedCard);
-document.getElementById("fightBtn").addEventListener("click", nextPhase);
+document.getElementById("fightBtn").addEventListener("click", () => enqueue(nextPhase));
 
 startGame();
