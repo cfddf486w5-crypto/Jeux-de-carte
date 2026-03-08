@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='744' height='1039' viewBox='0 0 744 1039'>
+<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#0b1b34'/><stop offset='100%' stop-color='#1d4d7a'/></linearGradient></defs>
+<rect width='744' height='1039' fill='url(#g)'/>
+<rect x='18' y='18' width='708' height='1003' rx='24' fill='none' stroke='#7ed6ff' stroke-width='6'/>
+<text x='30' y='70' font-size='40' font-weight='700' fill='#ffffff'>Synchronisation Tactique</text>
+<text x='30' y='110' font-size='24' fill='#a8e7ff'>Puissance • Humain/Raxen</text>
+<rect x='30' y='140' width='684' height='70' rx='12' fill='#0a2b46' stroke='#61c8ff' stroke-width='2'/>
+<text x='42' y='186' font-size='26' fill='#d9f4ff'>Mana: 3</text>
+<rect x='30' y='230' width='684' height='760' rx='16' fill='#0f3559'/>
+<text x='30' y='250' font-size='22' fill='#e8f6ff'>Donne +2 VIT et initiative à une unité.</text>
+<text x='30' y='980' font-size='18' fill='#9ad8ff'>ID: P-008 • Guerre des 10 000 ans</text>
+</svg>
