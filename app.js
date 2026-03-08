@@ -8,25 +8,19 @@ const abilities = [
   { name: "Miroir Arcanique", text: "Renvoie 2 dégâts à chaque attaque reçue.", onDamaged: (attacker) => (attacker.hp -= 2) },
   { name: "Concentration", text: "Le critique passe de 10% à 25%.", critChance: 0.25 },
   { name: "Lame Venimeuse", text: "Ajoute 2 dégâts fixes.", bonusDamage: 2 },
-  { name: "Bouclier Sacré", text: "Ignorer complètement la 1re attaque reçue.", init: (s) => (s.blockOnce = true), defend: (s, dmg) => {
-    if (s.blockOnce) {
-      s.blockOnce = false;
-      return 0;
-    }
-    return dmg;
-  }},
+  { name: "Bouclier Sacré", text: "Ignore la 1re attaque reçue.", init: (s) => (s.blockOnce = true), defend: (s, dmg) => s.blockOnce ? ((s.blockOnce = false), 0) : dmg },
   { name: "Charge Solaire", text: "Gagne +1 attaque à chaque tour.", turnStart: (s) => (s.scalingAtk += 1) },
   { name: "Ombre Vive", text: "Esquive 20% des coups.", evadeChance: 0.2 }
 ];
 
 function createDeck(prefix, themes, offset) {
-  const deck = [];
-  for (let i = 0; i < 60; i++) {
+  return Array.from({ length: 60 }, (_, i) => {
     const className = classes[i % classes.length];
     const ability = abilities[(i + offset) % abilities.length];
     const theme = themes[i % themes.length];
     const rank = Math.floor(i / themes.length) + 1;
-    deck.push({
+
+    return {
       id: `${prefix}-${i + 1}`,
       name: `${theme} ${rank}`,
       className,
@@ -34,51 +28,107 @@ function createDeck(prefix, themes, offset) {
       defense: 4 + ((i * 5 + offset) % 7),
       hp: 28 + ((i * 7 + offset) % 18),
       speed: 3 + ((i * 2 + offset) % 8),
-      ability
-    });
-  }
-  return deck;
+      ability,
+      cost: 1 + Math.floor((i + offset) % 7)
+    };
+  });
 }
 
-const deckA = createDeck("SOL", ["Aurogard", "Lumina", "Helion", "Solaria", "Astreon", "Pyrelis", "Orionel", "Clareon", "Valkor", "Zenith", "Dawnis", "Rubion"], 1);
-const deckB = createDeck("OMB", ["Nocthar", "Umbrys", "Néantor", "Morbane", "Velkar", "Shadriel", "Sépulor", "Duskhan", "Obscuron", "Vesper", "Nyxor", "Drakmor"], 5);
+const baseDeckA = createDeck("SOL", ["Aurogard", "Lumina", "Helion", "Solaria", "Astreon", "Pyrelis", "Orionel", "Clareon", "Valkor", "Zenith", "Dawnis", "Rubion"], 1);
+const baseDeckB = createDeck("OMB", ["Nocthar", "Umbrys", "Néantor", "Morbane", "Velkar", "Shadriel", "Sépulor", "Duskhan", "Obscuron", "Vesper", "Nyxor", "Drakmor"], 5);
 
-function pickRandomHand(deck, size = 7) {
+const state = {
+  turn: 1,
+  playerHp: 30,
+  opponentHp: 30,
+  playerMana: 1,
+  opponentMana: 1,
+  playerDeck: [],
+  opponentDeck: [],
+  playerHand: [],
+  opponentHand: [],
+  playerSlot: null,
+  opponentSlot: null,
+  selectedCardId: null,
+  logs: []
+};
+
+function shuffle(deck) {
   const copy = [...deck];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  return copy.slice(0, size);
+  return copy;
 }
 
-function renderHand3D(targetId, hand, factionName) {
-  const container = document.getElementById(targetId);
+function draw(hand, deck, amount = 1) {
+  for (let i = 0; i < amount; i++) {
+    if (deck.length) hand.push(deck.shift());
+  }
+}
+
+function toState(card) {
+  const s = { name: card.name, atk: card.attack, def: card.defense, hp: card.hp, spd: card.speed, ability: card.ability, scalingAtk: 0, burst: false, blockOnce: false };
+  card.ability.init?.(s);
+  return s;
+}
+
+function strike(attacker, defender, turn) {
+  if (Math.random() < (defender.ability.evadeChance || 0)) return 0;
+  let raw = attacker.atk + attacker.scalingAtk - Math.floor(defender.def / 2) + (attacker.ability.bonusDamage || 0);
+  raw = Math.max(1, raw);
+  if (attacker.ability.hit) raw = Math.round(attacker.ability.hit(attacker, raw, turn));
+  if (Math.random() < (attacker.ability.critChance || 0.1)) raw = Math.round(raw * 1.5);
+  const dealt = Math.max(0, defender.ability.defend ? defender.ability.defend(defender, raw) : raw);
+  defender.hp -= dealt;
+  attacker.ability.afterHit?.(attacker, dealt);
+  defender.ability.onDamaged?.(attacker);
+  return dealt;
+}
+
+function duel(cardA, cardB) {
+  const a = toState(cardA);
+  const b = toState(cardB);
+  const first = a.spd >= b.spd ? [a, b] : [b, a];
+  strike(first[0], first[1], state.turn);
+  if (first[1].hp > 0) strike(first[1], first[0], state.turn);
+  return { aHp: a.hp, bHp: b.hp };
+}
+
+function cardSummary(card) {
+  return `<strong>${card.name}</strong><br>Coût ${card.cost} · ${card.attack}/${card.defense} · PV ${card.hp}<br><small>${card.ability.name}</small>`;
+}
+
+function renderHand() {
+  const container = document.getElementById("deckA");
   container.innerHTML = "";
   const tpl = document.getElementById("cardTemplate");
 
-  hand.forEach((card, index) => {
+  state.playerHand.forEach((card, index) => {
     const fragment = tpl.content.cloneNode(true);
-    const cardNode = fragment.querySelector(".card-3d");
-    cardNode.style.setProperty("--i", index - Math.floor(hand.length / 2));
-    cardNode.style.setProperty("--rotate", `${(index - Math.floor(hand.length / 2)) * 5}deg`);
+    const node = fragment.querySelector(".card-3d");
+    node.style.setProperty("--rotate", `${(index - Math.floor(state.playerHand.length / 2)) * 4}deg`);
 
     fragment.querySelector(".card-name").textContent = card.name;
     fragment.querySelector(".card-class").textContent = card.className;
     fragment.querySelector(".card-ability").textContent = `${card.ability.name} — ${card.ability.text}`;
+    fragment.querySelector(".cost").textContent = card.cost;
     fragment.querySelector(".atk").textContent = card.attack;
     fragment.querySelector(".def").textContent = card.defense;
     fragment.querySelector(".hp").textContent = card.hp;
-    fragment.querySelector(".spd").textContent = card.speed;
-    fragment.querySelector(".faction").textContent = factionName;
-    fragment.querySelector(".card-id").textContent = card.id;
 
-    const toggleFlip = () => cardNode.classList.toggle("is-flipped");
-    cardNode.addEventListener("click", toggleFlip);
-    cardNode.addEventListener("keydown", (event) => {
+    if (state.selectedCardId === card.id) node.classList.add("is-selected");
+
+    const select = () => {
+      state.selectedCardId = card.id;
+      render();
+    };
+    node.addEventListener("click", select);
+    node.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        toggleFlip();
+        select();
       }
     });
 
@@ -86,137 +136,125 @@ function renderHand3D(targetId, hand, factionName) {
   });
 }
 
-function dealHands() {
-  renderHand3D("deckA", pickRandomHand(deckA, 7), "Gardiens Solaires");
-  renderHand3D("deckB", pickRandomHand(deckB, 7), "Légion Ombreuse");
+function renderOpponentHand() {
+  const container = document.getElementById("opponentHand");
+  container.innerHTML = "";
+  state.opponentHand.forEach(() => {
+    const cardBack = document.createElement("div");
+    cardBack.className = "back-mini";
+    container.appendChild(cardBack);
+  });
 }
 
-function toState(card) {
-  const state = {
-    name: card.name,
-    atk: card.attack,
-    def: card.defense,
-    hp: card.hp,
-    spd: card.speed,
-    ability: card.ability,
-    scalingAtk: 0,
-    burst: false,
-    blockOnce: false
-  };
-  card.ability.init?.(state);
-  return state;
+function render() {
+  document.getElementById("playerHp").textContent = state.playerHp;
+  document.getElementById("opponentHp").textContent = state.opponentHp;
+  document.getElementById("playerMana").textContent = state.playerMana;
+  document.getElementById("opponentMana").textContent = state.opponentMana;
+  document.getElementById("turnCounter").textContent = state.turn;
+
+  document.getElementById("playerSlot").innerHTML = state.playerSlot ? cardSummary(state.playerSlot) : "Aucune créature alliée";
+  document.getElementById("opponentSlot").innerHTML = state.opponentSlot ? cardSummary(state.opponentSlot) : "Aucune créature adverse";
+
+  renderHand();
+  renderOpponentHand();
+  document.getElementById("battleLog").textContent = state.logs.slice(-12).join("\n");
 }
 
-function performHit(attacker, defender, turn, logs) {
-  if (Math.random() < (defender.ability.evadeChance || 0)) {
-    logs.push(`${defender.name} esquive l'attaque de ${attacker.name}.`);
+function startGame() {
+  Object.assign(state, {
+    turn: 1,
+    playerHp: 30,
+    opponentHp: 30,
+    playerMana: 1,
+    opponentMana: 1,
+    playerDeck: shuffle(baseDeckA),
+    opponentDeck: shuffle(baseDeckB),
+    playerHand: [],
+    opponentHand: [],
+    playerSlot: null,
+    opponentSlot: null,
+    selectedCardId: null,
+    logs: ["Nouvelle partie lancée. Votre objectif : réduire les PV adverses à 0."]
+  });
+
+  draw(state.playerHand, state.playerDeck, 5);
+  draw(state.opponentHand, state.opponentDeck, 5);
+  render();
+}
+
+function playSelectedCard() {
+  if (state.playerSlot) return state.logs.push("Votre zone de combat est déjà occupée.") || render();
+  const card = state.playerHand.find((c) => c.id === state.selectedCardId);
+  if (!card) return state.logs.push("Sélectionnez d'abord une carte.") || render();
+  if (card.cost > state.playerMana) return state.logs.push(`Mana insuffisant (${card.cost} requis).`) || render();
+
+  state.playerMana -= card.cost;
+  state.playerSlot = card;
+  state.playerHand = state.playerHand.filter((c) => c.id !== card.id);
+  state.selectedCardId = null;
+  state.logs.push(`Vous invoquez ${card.name}.`);
+  render();
+}
+
+function opponentPlay() {
+  if (state.opponentSlot) return;
+  const playable = state.opponentHand.filter((c) => c.cost <= state.opponentMana);
+  if (!playable.length) {
+    state.logs.push("L'adversaire ne peut rien invoquer ce tour.");
     return;
   }
+  playable.sort((a, b) => b.cost - a.cost);
+  const card = playable[0];
+  state.opponentMana -= card.cost;
+  state.opponentSlot = card;
+  state.opponentHand = state.opponentHand.filter((c) => c.id !== card.id);
+  state.logs.push(`L'adversaire invoque ${card.name}.`);
+}
 
-  let raw = attacker.atk + attacker.scalingAtk - Math.floor(defender.def / 2) + (attacker.ability.bonusDamage || 0);
-  raw = Math.max(1, raw);
-  if (attacker.ability.hit) raw = Math.round(attacker.ability.hit(attacker, raw, turn));
-
-  const critChance = attacker.ability.critChance || 0.1;
-  if (Math.random() < critChance) {
-    raw = Math.round(raw * 1.5);
-    logs.push(`💥 Coup critique de ${attacker.name} !`);
+function resolveCombat() {
+  if (state.playerSlot && state.opponentSlot) {
+    const result = duel(state.playerSlot, state.opponentSlot);
+    state.logs.push(`Duel: ${state.playerSlot.name} (${Math.max(0, result.aHp)} PV) vs ${state.opponentSlot.name} (${Math.max(0, result.bHp)} PV).`);
+    if (result.aHp <= 0) state.playerSlot = null;
+    if (result.bHp <= 0) state.opponentSlot = null;
   }
 
-  let dealt = defender.ability.defend ? defender.ability.defend(defender, raw) : raw;
-  dealt = Math.max(0, dealt);
-  defender.hp -= dealt;
-  logs.push(`${attacker.name} inflige ${dealt} dégâts à ${defender.name}.`);
-
-  attacker.ability.afterHit?.(attacker, dealt);
-  defender.ability.onDamaged?.(attacker);
-
-  if (Math.random() < (attacker.ability.extraHitChance || 0) && defender.hp > 0) {
-    logs.push(`⚔️ ${attacker.name} enchaîne une seconde attaque !`);
-    defender.hp -= Math.max(1, Math.floor((attacker.atk - defender.def / 2) * 0.7));
+  if (state.playerSlot && !state.opponentSlot) {
+    state.opponentHp -= Math.max(1, Math.floor(state.playerSlot.attack / 2));
+    state.logs.push(`${state.playerSlot.name} frappe directement le héros adverse.`);
+  }
+  if (state.opponentSlot && !state.playerSlot) {
+    state.playerHp -= Math.max(1, Math.floor(state.opponentSlot.attack / 2));
+    state.logs.push(`${state.opponentSlot.name} inflige des dégâts à votre héros.`);
   }
 }
 
-function battle(cardA, cardB) {
-  const a = toState(cardA);
-  const b = toState(cardB);
-  const logs = [`Début du duel : ${a.name} vs ${b.name}`];
+function endTurn() {
+  if (state.playerHp <= 0 || state.opponentHp <= 0) return;
 
-  for (let turn = 1; turn <= 20; turn++) {
-    a.ability.turnStart?.(a);
-    b.ability.turnStart?.(b);
+  opponentPlay();
+  resolveCombat();
 
-    logs.push(`\n— Tour ${turn} —`);
-    const first = a.spd >= b.spd ? [a, b] : [b, a];
-
-    performHit(first[0], first[1], turn, logs);
-    if (first[1].hp <= 0) break;
-
-    performHit(first[1], first[0], turn, logs);
-    if (first[0].hp <= 0) break;
+  if (state.playerHp <= 0 || state.opponentHp <= 0) {
+    const message = state.playerHp <= 0 ? "Défaite. L'adversaire l'emporte." : "Victoire ! Vous remportez la partie.";
+    document.getElementById("battleResult").textContent = message;
+    state.logs.push(message);
+    return render();
   }
 
-  const winner = a.hp === b.hp ? null : a.hp > b.hp ? a : b;
-  return {
-    winner: winner ? `${winner.name} gagne le combat !` : "Égalité parfaite !",
-    logs
-  };
+  state.turn += 1;
+  state.playerMana = Math.min(10, state.turn);
+  state.opponentMana = Math.min(10, state.turn);
+  draw(state.playerHand, state.playerDeck, 1);
+  draw(state.opponentHand, state.opponentDeck, 1);
+  document.getElementById("battleResult").textContent = `Tour ${state.turn} — préparez votre prochaine action.`;
+  state.logs.push(`--- Tour ${state.turn} ---`);
+  render();
 }
 
-function simulateRound(deckMain, deckOpponent) {
-  const mainHand = pickRandomHand(deckMain, 7);
-  const opponentHand = pickRandomHand(deckOpponent, 7);
+document.getElementById("dealBtn").addEventListener("click", startGame);
+document.getElementById("playBtn").addEventListener("click", playSelectedCard);
+document.getElementById("fightBtn").addEventListener("click", endTurn);
 
-  const logs = [
-    `Chaque joueur pioche 7 cartes aléatoires parmi son paquet de 60.`,
-    `Main du joueur principal : ${mainHand.map((card) => card.name).join(", ")}.`,
-    `Main de l'opposant : ${opponentHand.map((card) => card.name).join(", ")}.`,
-    "",
-    "Début de la table de combat :",
-    `- Le joueur principal pose ${mainHand[0].name}.`,
-    `- L'opposant répond avec ${opponentHand[0].name}.`
-  ];
-
-  const maxTurns = Math.min(mainHand.length, opponentHand.length);
-
-  for (let turn = 1; turn <= maxTurns; turn++) {
-    const mainCard = mainHand[turn - 1];
-    const opponentCard = opponentHand[turn - 1];
-    logs.push(`\nTour ${turn}`);
-
-    if (turn > 1) {
-      logs.push(`- Le joueur principal pose ${mainCard.name}.`);
-      logs.push(`- L'opposant pose ${opponentCard.name}.`);
-    }
-
-    if (Math.random() < 0.7) {
-      const result = battle(mainCard, opponentCard);
-      logs.push(`- Fin de tour (joueur principal) : attaque déclarée avec ${mainCard.name}.`);
-      logs.push(`  ${result.winner}`);
-    } else {
-      logs.push("- Fin de tour (joueur principal) : il choisit de ne pas attaquer.");
-    }
-
-    if (Math.random() < 0.7) {
-      const result = battle(opponentCard, mainCard);
-      logs.push(`- Fin de tour (opposant) : attaque déclarée avec ${opponentCard.name}.`);
-      logs.push(`  ${result.winner}`);
-    } else {
-      logs.push("- Fin de tour (opposant) : il choisit de ne pas attaquer.");
-    }
-  }
-
-  return {
-    summary: "Manche simulée : pioche aléatoire, pose alternée, puis choix d'attaque en fin de tour.",
-    logs
-  };
-}
-
-document.getElementById("dealBtn").addEventListener("click", dealHands);
-document.getElementById("fightBtn").addEventListener("click", () => {
-  const result = simulateRound(deckA, deckB);
-  document.getElementById("battleResult").textContent = result.summary;
-  document.getElementById("battleLog").textContent = result.logs.join("\n");
-});
-
-dealHands();
+startGame();
