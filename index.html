@@ -3,46 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Générateur de Jeu de Cartes Héros</title>
+  <title>Chroniques Astrales — Prototype TCG</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <h1>Arène des Héros</h1>
-    <p>Deux paquets distincts de <strong>60 cartes héros</strong>, avec combat et habiletés.</p>
+    <h1>Chroniques Astrales</h1>
+    <p>Prototype original d'interface de jeu de cartes stratégique (inspiré du genre TCG).</p>
   </header>
 
-  <main>
-    <section class="arena-panel">
-      <h2>Déroulé d'une manche</h2>
-      <p>
-        Au début de partie, chaque joueur pioche 7 cartes aléatoires depuis son paquet de 60 cartes.
-        Ensuite ils posent chacun leur tour une carte sur la table de combat, puis peuvent choisir
-        d'attaquer une carte ennemie en fin de tour.
-      </p>
+  <main class="board">
+    <section class="hero hero-opponent">
+      <h2>Adversaire</h2>
+      <p>PV <strong id="opponentHp">30</strong> · Mana <strong id="opponentMana">1</strong></p>
+      <div id="opponentHand" class="opponent-hand"></div>
+    </section>
+
+    <section class="battlefield">
+      <h2>Champ de bataille</h2>
+      <div class="lane-grid">
+        <article class="lane-card" id="opponentSlot">Aucune créature adverse</article>
+        <article class="lane-card" id="playerSlot">Aucune créature alliée</article>
+      </div>
       <div class="action-row">
-        <button id="dealBtn">Distribuer 7 cartes en 3D</button>
-        <button id="fightBtn">Simuler une manche</button>
+        <button id="dealBtn">Nouvelle partie</button>
+        <button id="playBtn">Jouer la carte sélectionnée</button>
+        <button id="fightBtn">Terminer le tour</button>
       </div>
       <div id="battleResult" class="battle-result"></div>
       <pre id="battleLog" class="battle-log"></pre>
     </section>
 
-    <section>
-      <h2>Vue 3D — Gardiens Solaires (7 cartes visibles)</h2>
-      <p class="hint">Cliquez une carte pour la retourner. Les paquets complets de 60 cartes sont toujours utilisés pour la simulation.</p>
+    <section class="hero hero-player">
+      <h2>Vous</h2>
+      <p>PV <strong id="playerHp">30</strong> · Mana <strong id="playerMana">1</strong> · Tour <strong id="turnCounter">1</strong></p>
+      <p class="hint">Sélectionnez une carte puis cliquez sur « Jouer la carte sélectionnée ».</p>
       <div id="deckA" class="hand-3d"></div>
-    </section>
-
-    <section>
-      <h2>Vue 3D — Légion Ombreuse (7 cartes visibles)</h2>
-      <p class="hint">Main distribuée aléatoirement à chaque clic sur « Distribuer 7 cartes en 3D ».</p>
-      <div id="deckB" class="hand-3d"></div>
     </section>
   </main>
 
   <template id="cardTemplate">
-    <article class="card-3d" tabindex="0" role="button" aria-label="Retourner la carte">
+    <article class="card-3d" tabindex="0" role="button" aria-label="Sélectionner la carte">
       <div class="card-inner">
         <div class="card-face card-front">
           <div class="card-header">
@@ -51,16 +52,11 @@
           </div>
           <p class="card-ability"></p>
           <ul class="stats">
+            <li>COÛT <strong class="cost"></strong></li>
             <li>ATK <strong class="atk"></strong></li>
             <li>DEF <strong class="def"></strong></li>
             <li>PV <strong class="hp"></strong></li>
-            <li>VIT <strong class="spd"></strong></li>
           </ul>
-        </div>
-        <div class="card-face card-back">
-          <p class="faction"></p>
-          <p class="card-id"></p>
-          <p class="back-mark">ARÈNE DES HÉROS</p>
         </div>
       </div>
     </article>
