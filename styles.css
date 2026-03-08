@@ -109,6 +109,30 @@ h2 { margin: 0 0 0.45rem; }
   background: #111832;
 }
 
+.lane-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  gap: 0.4rem;
+}
+
+.mini-slot {
+  min-height: 88px;
+  border: 1px solid #4f5ea5;
+  border-radius: 10px;
+  padding: 0.45rem;
+  font-size: 0.72rem;
+  background: #0d1430;
+}
+
+.mini-slot em {
+  color: #9faddf;
+}
+
 .action-row {
   display: flex;
   flex-wrap: wrap;

@@ -1,0 +1,115 @@
+{
+  "deck_name": "Arche de Ruine — Raxen Ancestraux",
+  "race": "Raxen",
+  "faction": "Conquérants de la Destruction",
+  "origin_story": "Race ancestrale errant dans l'univers depuis des milliards d'années à la conquête et à la destruction des mondes.",
+  "cataclysm": "Il y a 1 000 000 milliards d'années, les Raxen ont détruit leur planète durant une guerre totale entre eux.",
+  "exodus": "Les rares survivants ont quitté leur système dans une Arche et depuis, ils anéantissent tous les mondes qu'ils croisent.",
+  "cards": [
+    {
+      "id": "RH-001",
+      "type": "Héros",
+      "name": "Xal'Tor, Patriarche de l'Arche Brisée",
+      "mana": 12,
+      "pv": 36,
+      "attack": 9,
+      "defense": 12,
+      "speed": 3,
+      "effect": "Aura: les unités Raxen gagnent +2 ATQ. À chaque monde conquis, soigne 4 PV.",
+      "story": "Dernier stratège de la guerre originelle raxenne, il guide l'Arche vers des mondes à réduire en cendres."
+    },
+    {
+      "id": "RU-001",
+      "type": "Unité",
+      "name": "Briseur de Noyau",
+      "mana": 5,
+      "pv": 20,
+      "attack": 8,
+      "defense": 5,
+      "speed": 4,
+      "effect": "À l'attaque d'un héros, inflige +3 dégâts directs.",
+      "story": "Fantassin lourd spécialisé dans la destruction des cœurs planétaires."
+    },
+    {
+      "id": "RU-002",
+      "type": "Unité",
+      "name": "Archiviste des Cendres",
+      "mana": 4,
+      "pv": 18,
+      "attack": 4,
+      "defense": 8,
+      "speed": 2,
+      "effect": "À l'invocation: pioche 1 carte Raxen.",
+      "story": "Conserve la mémoire des milliards de mondes détruits."
+    },
+    {
+      "id": "RU-003",
+      "type": "Unité",
+      "name": "Éclaireur du Vide Profond",
+      "mana": 3,
+      "pv": 16,
+      "attack": 5,
+      "defense": 4,
+      "speed": 7,
+      "effect": "Esquive 20%. Si survit, donne +1 vitesse à un allié.",
+      "story": "Premier à entrer en orbite pour marquer les cités à annihiler."
+    },
+    {
+      "id": "RU-004",
+      "type": "Unité",
+      "name": "Régent Biomécanique",
+      "mana": 6,
+      "pv": 24,
+      "attack": 6,
+      "defense": 10,
+      "speed": 2,
+      "effect": "À la fin du tour: soigne 2 PV à une unité alliée.",
+      "story": "Ingénieur de chair et de métal, il recoud les soldats sur le champ de ruine."
+    },
+    {
+      "id": "RU-005",
+      "type": "Unité",
+      "name": "Prédatrice d'Étoiles",
+      "mana": 7,
+      "pv": 22,
+      "attack": 10,
+      "defense": 6,
+      "speed": 5,
+      "effect": "Critique 25%. Si elle détruit une unité, peut réattaquer.",
+      "story": "Créature de guerre élevée dans les soutes noires de l'Arche."
+    },
+    {
+      "id": "RS-001",
+      "type": "Sort",
+      "name": "Décret d'Extinction",
+      "mana": 6,
+      "effect": "Inflige 7 dégâts à toutes les unités ennemies.",
+      "story": "Sentence impériale utilisée avant la vitrification d'une planète."
+    },
+    {
+      "id": "RS-002",
+      "type": "Sort",
+      "name": "Forge d'Antimatière",
+      "mana": 4,
+      "effect": "Donne +3 ATQ et +3 DEF à une unité alliée.",
+      "story": "Rituel industriel où le métal vivant boit la lumière des soleils morts."
+    },
+    {
+      "id": "RS-003",
+      "type": "Sort",
+      "name": "Serment des Survivants",
+      "mana": 3,
+      "effect": "Soigne le héros de 6 PV et une unité de 4 PV.",
+      "story": "Promesse gravée après la destruction de leur monde natal."
+    },
+    {
+      "id": "RA-001",
+      "type": "Artefact",
+      "name": "Arche de la Guerre Sans Fin",
+      "mana": 8,
+      "pv": 18,
+      "effect": "Une fois par tour: invoque un Drone Raxen 3/3.",
+      "story": "Vaisseau ancestral des survivants, cathédrale mobile de destruction."
+    }
+  ]
+}
