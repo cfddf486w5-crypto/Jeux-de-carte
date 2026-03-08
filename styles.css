@@ -1,0 +1,149 @@
+:root {
+  --bg: #0f1122;
+  --panel: #1a1f38;
+  --text: #f5f7ff;
+  --accent-a: #ffbb33;
+  --accent-b: #8a5eff;
+  --card: #222949;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1f2852 0%, var(--bg) 55%);
+  color: var(--text);
+}
+
+header {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+main {
+  width: min(1280px, 95vw);
+  margin: 0 auto 3rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+section {
+  background: color-mix(in oklab, var(--panel) 94%, black);
+  border: 1px solid #343a64;
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.arena-panel {
+  background: linear-gradient(145deg, #1f2551, #161b34);
+}
+
+.selectors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+select,
+button {
+  border-radius: 10px;
+  border: 1px solid #4e568d;
+  padding: 0.65rem;
+  font-size: 0.95rem;
+}
+
+button {
+  margin-top: 1rem;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+  border: none;
+  color: #101321;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.battle-result {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.battle-log {
+  margin-top: 0.8rem;
+  max-height: 220px;
+  overflow: auto;
+  background: #11152c;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #394170;
+  white-space: pre-wrap;
+}
+
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.8rem;
+}
+
+.card {
+  background: linear-gradient(165deg, #2a3158, var(--card));
+  border: 1px solid #46508d;
+  border-radius: 12px;
+  padding: 0.75rem;
+  box-shadow: 0 6px 14px rgb(0 0 0 / 22%);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.card-name {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-class {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #3a4374;
+}
+
+.card-ability {
+  font-size: 0.82rem;
+  color: #d9ddff;
+  min-height: 2.2rem;
+}
+
+.stats {
+  margin: 0;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+
+#deckA .card {
+  border-left: 4px solid var(--accent-a);
+}
+
+#deckB .card {
+  border-left: 4px solid var(--accent-b);
+}
