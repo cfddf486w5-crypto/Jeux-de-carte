@@ -59,16 +59,6 @@ function renderDeck(targetId, deck) {
   });
 }
 
-function fillSelector(selectId, deck) {
-  const select = document.getElementById(selectId);
-  deck.forEach((card, index) => {
-    const option = document.createElement("option");
-    option.value = index;
-    option.textContent = `${card.name} (${card.className})`;
-    select.appendChild(option);
-  });
-}
-
 function toState(card) {
   const state = {
     name: card.name,
@@ -143,13 +133,67 @@ function battle(cardA, cardB) {
 
 renderDeck("deckA", deckA);
 renderDeck("deckB", deckB);
-fillSelector("deckASelect", deckA);
-fillSelector("deckBSelect", deckB);
+
+function pickRandomHand(deck, size = 7) {
+  const copy = [...deck];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, size);
+}
+
+function simulateRound(deckMain, deckOpponent) {
+  const mainHand = pickRandomHand(deckMain, 7);
+  const opponentHand = pickRandomHand(deckOpponent, 7);
+
+  const logs = [
+    `Chaque joueur pioche 7 cartes aléatoires parmi son paquet de 60.`,
+    `Main du joueur principal : ${mainHand.map((card) => card.name).join(", ")}.`,
+    `Main de l'opposant : ${opponentHand.map((card) => card.name).join(", ")}.`,
+    "",
+    "Début de la table de combat :",
+    `- Le joueur principal pose ${mainHand[0].name}.`,
+    `- L'opposant répond avec ${opponentHand[0].name}.`
+  ];
+
+  const maxTurns = Math.min(mainHand.length, opponentHand.length);
+
+  for (let turn = 1; turn <= maxTurns; turn++) {
+    const mainCard = mainHand[turn - 1];
+    const opponentCard = opponentHand[turn - 1];
+    logs.push(`\nTour ${turn}`);
+
+    if (turn > 1) {
+      logs.push(`- Le joueur principal pose ${mainCard.name}.`);
+      logs.push(`- L'opposant pose ${opponentCard.name}.`);
+    }
+
+    if (Math.random() < 0.7) {
+      const result = battle(mainCard, opponentCard);
+      logs.push(`- Fin de tour (joueur principal) : attaque déclarée avec ${mainCard.name}.`);
+      logs.push(`  ${result.winner}`);
+    } else {
+      logs.push("- Fin de tour (joueur principal) : il choisit de ne pas attaquer.");
+    }
+
+    if (Math.random() < 0.7) {
+      const result = battle(opponentCard, mainCard);
+      logs.push(`- Fin de tour (opposant) : attaque déclarée avec ${opponentCard.name}.`);
+      logs.push(`  ${result.winner}`);
+    } else {
+      logs.push("- Fin de tour (opposant) : il choisit de ne pas attaquer.");
+    }
+  }
+
+  return {
+    summary: "Manche simulée : pioche aléatoire, pose alternée, puis choix d'attaque en fin de tour.",
+    logs
+  };
+}
 
 document.getElementById("fightBtn").addEventListener("click", () => {
-  const cardA = deckA[Number(document.getElementById("deckASelect").value)];
-  const cardB = deckB[Number(document.getElementById("deckBSelect").value)];
-  const result = battle(cardA, cardB);
-  document.getElementById("battleResult").textContent = result.winner;
+  const result = simulateRound(deckA, deckB);
+  document.getElementById("battleResult").textContent = result.summary;
   document.getElementById("battleLog").textContent = result.logs.join("\n");
 });

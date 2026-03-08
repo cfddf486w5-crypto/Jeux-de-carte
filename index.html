@@ -14,18 +14,13 @@
 
   <main>
     <section class="arena-panel">
-      <h2>Simulateur de combat</h2>
-      <div class="selectors">
-        <label>
-          Héros du paquet Solaire
-          <select id="deckASelect"></select>
-        </label>
-        <label>
-          Héros du paquet Ombreux
-          <select id="deckBSelect"></select>
-        </label>
-      </div>
-      <button id="fightBtn">Lancer le combat</button>
+      <h2>Déroulé d'une manche</h2>
+      <p>
+        Au début de partie, chaque joueur pioche 7 cartes aléatoires depuis son paquet de 60 cartes.
+        Ensuite ils posent chacun leur tour une carte sur la table de combat, puis peuvent choisir
+        d'attaquer une carte ennemie en fin de tour.
+      </p>
+      <button id="fightBtn">Simuler une manche</button>
       <div id="battleResult" class="battle-result"></div>
       <pre id="battleLog" class="battle-log"></pre>
     </section>
