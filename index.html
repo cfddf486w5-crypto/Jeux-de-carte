@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de Jeu de Cartes Héros</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Arène des Héros</h1>
+    <p>Deux paquets distincts de <strong>60 cartes héros</strong>, avec combat et habiletés.</p>
+  </header>
+
+  <main>
+    <section class="arena-panel">
+      <h2>Simulateur de combat</h2>
+      <div class="selectors">
+        <label>
+          Héros du paquet Solaire
+          <select id="deckASelect"></select>
+        </label>
+        <label>
+          Héros du paquet Ombreux
+          <select id="deckBSelect"></select>
+        </label>
+      </div>
+      <button id="fightBtn">Lancer le combat</button>
+      <div id="battleResult" class="battle-result"></div>
+      <pre id="battleLog" class="battle-log"></pre>
+    </section>
+
+    <section>
+      <h2>Paquet 1 : Gardiens Solaires (60 cartes)</h2>
+      <div id="deckA" class="deck-grid"></div>
+    </section>
+
+    <section>
+      <h2>Paquet 2 : Légion Ombreuse (60 cartes)</h2>
+      <div id="deckB" class="deck-grid"></div>
+    </section>
+  </main>
+
+  <template id="cardTemplate">
+    <article class="card">
+      <div class="card-header">
+        <h3 class="card-name"></h3>
+        <span class="card-class"></span>
+      </div>
+      <p class="card-ability"></p>
+      <ul class="stats">
+        <li>ATK <strong class="atk"></strong></li>
+        <li>DEF <strong class="def"></strong></li>
+        <li>PV <strong class="hp"></strong></li>
+        <li>VIT <strong class="spd"></strong></li>
+      </ul>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
