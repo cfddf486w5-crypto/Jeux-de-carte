@@ -1,0 +1,21 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='744' height='1039' viewBox='0 0 744 1039'>
+<defs>
+  <linearGradient id='bg5' x1='0' y1='0' x2='1' y2='1'>
+    <stop offset='0%' stop-color='#0d1f38'/>
+    <stop offset='100%' stop-color='#225ea8'/>
+  </linearGradient>
+</defs>
+<rect width='744' height='1039' fill='url(#bg5)'/>
+<rect x='18' y='18' width='708' height='1003' rx='24' fill='none' stroke='#b8d7ff' stroke-width='6'/>
+<rect x='30' y='30' width='684' height='88' rx='14' fill='#00000033' stroke='#7fb0ff' stroke-width='2'/>
+<text x='42' y='84' font-size='37' font-weight='700' fill='#ffffff'>Prédatrice d'Étoiles</text>
+<text x='42' y='140' font-size='24' fill='#b8d7ff'>Unité • Raxen</text>
+<rect x='30' y='166' width='684' height='62' rx='10' fill='#0000002b' stroke='#7fb0ff' stroke-width='2'/>
+<text x='42' y='207' font-size='25' fill='#f4f7ff'>Mana: 7 | ATQ: 10 | DEF: 6 | PV: 22 | VIT: 5</text>
+<rect x='30' y='250' width='684' height='242' rx='16' fill='#00000026' stroke='#7fb0ff' stroke-width='1.5'/>
+<text x='42' y='280' font-size='24' fill='#f4f7ff'>Critique 25%. Si elle détruit une unité, peut</text><text x='42' y='314' font-size='24' fill='#f4f7ff'>réattaquer.</text>
+<rect x='30' y='512' width='684' height='432' rx='16' fill='#00000020' stroke='#7fb0ff' stroke-width='1.5'/>
+<text x='42' y='548' font-size='24' fill='#b8d7ff'>Chronique</text>
+<text x='42' y='540' font-size='21' fill='#d7e9ff'>Créature de guerre élevée dans les soutes noires de</text><text x='42' y='570' font-size='21' fill='#d7e9ff'>l'Arche.</text>
+<text x='42' y='986' font-size='19' fill='#b8d7ff'>ID: RU-005 • Arche de Ruine — Raxen Ancestraux</text>
+</svg>
