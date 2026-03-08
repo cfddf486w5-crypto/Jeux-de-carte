@@ -41,30 +41,19 @@ section {
   background: linear-gradient(145deg, #1f2551, #161b34);
 }
 
-.selectors {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
 }
 
-label {
-  display: grid;
-  gap: 0.4rem;
-  font-size: 0.95rem;
-}
-
-select,
 button {
   border-radius: 10px;
-  border: 1px solid #4e568d;
-  padding: 0.65rem;
+  border: none;
+  padding: 0.65rem 0.9rem;
   font-size: 0.95rem;
-}
-
-button {
   margin-top: 1rem;
   background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
-  border: none;
   color: #101321;
   font-weight: 700;
   cursor: pointer;
@@ -91,18 +80,78 @@ button:hover {
   white-space: pre-wrap;
 }
 
-.deck-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 0.8rem;
+.hint {
+  color: #d2d8ff;
+  margin-top: 0;
 }
 
-.card {
-  background: linear-gradient(165deg, #2a3158, var(--card));
+.hand-3d {
+  perspective: 1200px;
+  min-height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 1.2rem 0.4rem 1.4rem;
+}
+
+.card-3d {
+  width: 185px;
+  height: 255px;
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: -70px;
+  transform-style: preserve-3d;
+  transform: translateY(8px) rotateZ(var(--rotate)) rotateX(18deg);
+  transition: transform 200ms ease;
+  cursor: pointer;
+}
+
+.card-3d:first-child {
+  margin-left: 0;
+}
+
+.card-3d:hover,
+.card-3d:focus-visible {
+  transform: translateY(-20px) rotateZ(var(--rotate)) rotateX(4deg) scale(1.06);
+  z-index: 10;
+  outline: none;
+}
+
+.card-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.55s ease;
+}
+
+.card-3d.is-flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
   border: 1px solid #46508d;
-  border-radius: 12px;
+  backface-visibility: hidden;
+  box-shadow: 0 12px 20px rgb(0 0 0 / 40%);
   padding: 0.75rem;
-  box-shadow: 0 6px 14px rgb(0 0 0 / 22%);
+}
+
+.card-front {
+  background: linear-gradient(165deg, #2a3158, var(--card));
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.2rem;
+  background: radial-gradient(circle at 30% 20%, #4d58a2 0%, #1a1f41 55%, #12162f 100%);
 }
 
 .card-header {
@@ -140,10 +189,22 @@ button:hover {
   font-size: 0.82rem;
 }
 
-#deckA .card {
+.faction {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.card-id,
+.back-mark {
+  color: #e4e7ff;
+  opacity: 0.9;
+  font-size: 0.8rem;
+}
+
+#deckA .card-front {
   border-left: 4px solid var(--accent-a);
 }
 
-#deckB .card {
+#deckB .card-front {
   border-left: 4px solid var(--accent-b);
 }

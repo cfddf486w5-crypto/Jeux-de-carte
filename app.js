@@ -43,20 +43,52 @@ function createDeck(prefix, themes, offset) {
 const deckA = createDeck("SOL", ["Aurogard", "Lumina", "Helion", "Solaria", "Astreon", "Pyrelis", "Orionel", "Clareon", "Valkor", "Zenith", "Dawnis", "Rubion"], 1);
 const deckB = createDeck("OMB", ["Nocthar", "Umbrys", "Néantor", "Morbane", "Velkar", "Shadriel", "Sépulor", "Duskhan", "Obscuron", "Vesper", "Nyxor", "Drakmor"], 5);
 
-function renderDeck(targetId, deck) {
+function pickRandomHand(deck, size = 7) {
+  const copy = [...deck];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, size);
+}
+
+function renderHand3D(targetId, hand, factionName) {
   const container = document.getElementById(targetId);
+  container.innerHTML = "";
   const tpl = document.getElementById("cardTemplate");
-  deck.forEach((card) => {
+
+  hand.forEach((card, index) => {
     const fragment = tpl.content.cloneNode(true);
-    fragment.querySelector(".card-name").textContent = `${card.name}`;
+    const cardNode = fragment.querySelector(".card-3d");
+    cardNode.style.setProperty("--i", index - Math.floor(hand.length / 2));
+    cardNode.style.setProperty("--rotate", `${(index - Math.floor(hand.length / 2)) * 5}deg`);
+
+    fragment.querySelector(".card-name").textContent = card.name;
     fragment.querySelector(".card-class").textContent = card.className;
     fragment.querySelector(".card-ability").textContent = `${card.ability.name} — ${card.ability.text}`;
     fragment.querySelector(".atk").textContent = card.attack;
     fragment.querySelector(".def").textContent = card.defense;
     fragment.querySelector(".hp").textContent = card.hp;
     fragment.querySelector(".spd").textContent = card.speed;
+    fragment.querySelector(".faction").textContent = factionName;
+    fragment.querySelector(".card-id").textContent = card.id;
+
+    const toggleFlip = () => cardNode.classList.toggle("is-flipped");
+    cardNode.addEventListener("click", toggleFlip);
+    cardNode.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggleFlip();
+      }
+    });
+
     container.appendChild(fragment);
   });
+}
+
+function dealHands() {
+  renderHand3D("deckA", pickRandomHand(deckA, 7), "Gardiens Solaires");
+  renderHand3D("deckB", pickRandomHand(deckB, 7), "Légion Ombreuse");
 }
 
 function toState(card) {
@@ -131,18 +163,6 @@ function battle(cardA, cardB) {
   };
 }
 
-renderDeck("deckA", deckA);
-renderDeck("deckB", deckB);
-
-function pickRandomHand(deck, size = 7) {
-  const copy = [...deck];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy.slice(0, size);
-}
-
 function simulateRound(deckMain, deckOpponent) {
   const mainHand = pickRandomHand(deckMain, 7);
   const opponentHand = pickRandomHand(deckOpponent, 7);
@@ -192,8 +212,11 @@ function simulateRound(deckMain, deckOpponent) {
   };
 }
 
+document.getElementById("dealBtn").addEventListener("click", dealHands);
 document.getElementById("fightBtn").addEventListener("click", () => {
   const result = simulateRound(deckA, deckB);
   document.getElementById("battleResult").textContent = result.summary;
   document.getElementById("battleLog").textContent = result.logs.join("\n");
 });
+
+dealHands();
